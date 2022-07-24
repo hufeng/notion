@@ -22,7 +22,7 @@ type Client struct {
 	baseUrl       string
 	notionVersion string
 	apiVersion    string
-	Token         string
+	token         string
 
 	common    service
 	Databases *DatabaseService
@@ -37,12 +37,13 @@ type service struct {
 	client *Client
 }
 
-func NewClient() *Client {
+func NewClient(token string) *Client {
 	c := &Client{
 		client:        http.DefaultClient,
 		baseUrl:       baseUrl,
 		notionVersion: notionVersion,
 		apiVersion:    apiVersion,
+		token:         token,
 	}
 	c.common.client = c
 	c.Databases = (*DatabaseService)(&c.common)
@@ -72,7 +73,8 @@ type reqParam struct {
 }
 
 func (c *Client) req(ctx context.Context, path string, param *reqParam, result any) error {
-	api := c.baseUrl + "/" + c.apiVersion + "/" + path
+	api := c.baseUrl + "/" + c.apiVersion + path
+
 	u, err := url.Parse(api)
 	if err != nil {
 		return err
@@ -106,7 +108,7 @@ func (c *Client) req(ctx context.Context, path string, param *reqParam, result a
 	}
 
 	// set header
-	req.Header.Add("Authorization", "Bearer "+c.Token)
+	req.Header.Add("Authorization", "Bearer "+c.token)
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("Notion-Version", c.notionVersion)
 

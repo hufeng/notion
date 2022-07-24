@@ -3,7 +3,7 @@ package notion
 import "testing"
 
 func TestNotionNew(t *testing.T) {
-	client := NewClient()
+	client := NewClient("")
 
 	if client.baseUrl != baseUrl {
 		t.Errorf("Expected %s, got %s", baseUrl, client.baseUrl)
@@ -17,7 +17,7 @@ func TestNotionNewWithSetParam(t *testing.T) {
 	testUrl := "https://api-test.notion.com"
 	testNotionVersion := "2022-06-29"
 
-	client := NewClient().SetBaseUrl(testUrl).SetNotionVersion(testNotionVersion)
+	client := NewClient("").SetBaseUrl(testUrl).SetNotionVersion(testNotionVersion)
 
 	if client.baseUrl != testUrl {
 		t.Errorf("Expected %s, got %s", testUrl, client.baseUrl)
