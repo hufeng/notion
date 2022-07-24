@@ -4,6 +4,12 @@ import (
 	"fmt"
 )
 
+type UserApi interface {
+	List()
+	Retrive(string) (*User, error)
+	RtriveBot(string) (*User, error)
+}
+
 type User struct {
 	Object    string `json:"object"`
 	Id        string `json:"id"`
@@ -19,12 +25,6 @@ type User struct {
 			Workspace bool   `json:"workspace,omitempty"`
 		} `json:"owner,omitempty"`
 	} `json:"bot,omitempty"`
-}
-
-type UserApi interface {
-	List()
-	Retrive(string) (*User, error)
-	RtriveBot(string) (*User, error)
 }
 
 type UserService service
