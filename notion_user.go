@@ -1,39 +1,53 @@
 package notion
 
 import (
-	"context"
 	"fmt"
 )
 
-type Base struct {
+type User struct {
 	Object    string `json:"object"`
 	Id        string `json:"id"`
 	Type      string `json:"type"`
 	Name      string `json:"name"`
 	AvatarUrl string `json:"avatar_url"`
-}
-
-type User struct {
-	Base
-	Person struct {
-		Email string `json:"email"`
-	} `json:"person"`
-}
-
-type Bot struct {
-	Base
+	Person    struct {
+		Email string `json:"email,omitempty"`
+	}
 	Bot struct {
 		Owner struct {
-			Type      string `json:"type"`
-			Workspace bool   `json:"workspace"`
-		} `json:"owner"`
-	} `json:"bot"`
+			Type      string `json:"type,omitempty"`
+			Workspace bool   `json:"workspace,omitempty"`
+		} `json:"owner,omitempty"`
+	} `json:"bot,omitempty"`
+}
+
+type UserApi interface {
+	List()
+	Retrive(string) (*User, error)
+	RtriveBot(string) (*User, error)
 }
 
 type UserService service
 
-func (u *UserService) retrive(ctx context.Context, userId string) (*Base, error) {
-	var user Base
+type UserPagination struct {
+	Object     string  `json:"object"`
+	Results    []*User `json:"results"`
+	NextCursor string  `json:"next_cursor"`
+	HasMore    bool    `json:"has_more"`
+	Type       string  `json:"type"`
+}
+
+func (u *UserService) List(start string, size int) (*UserPagination, error) {
+	var result UserPagination
+	err := u.client.get("/users", query{
+		"start_cursor": start,
+		"page_size":    fmt.Sprintf("%d", size),
+	}, &result)
+	return &result, err
+}
+
+func (u *UserService) Retrive(userId string) (*User, error) {
+	var user User
 	err := u.client.get(fmt.Sprintf("/users/%s", userId), nil, &user)
 	if err != nil {
 		return nil, err
@@ -41,11 +55,11 @@ func (u *UserService) retrive(ctx context.Context, userId string) (*Base, error)
 	return &user, err
 }
 
-func (u *UserService) retriveBot(ctx context.Context, botId string) (*Bot, error) {
-	var bot Bot
-	err := u.client.get(fmt.Sprintf("/users/%s", botId), nil, &bot)
+func (u *UserService) RetriveBot(botId string) (*User, error) {
+	var user User
+	err := u.client.get(fmt.Sprintf("/users/%s", botId), nil, &user)
 	if err != nil {
 		return nil, err
 	}
-	return &bot, err
+	return &user, err
 }

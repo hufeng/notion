@@ -2,7 +2,6 @@ package notion
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -45,6 +44,7 @@ func NewClient(token string) *Client {
 		apiVersion:    apiVersion,
 		token:         token,
 	}
+
 	c.common.client = c
 	c.Databases = (*DatabaseService)(&c.common)
 	c.Pages = (*PageService)(&c.common)
@@ -52,6 +52,7 @@ func NewClient(token string) *Client {
 	c.Comments = (*CommentService)(&c.common)
 	c.Search = (*SearchService)(&c.common)
 	c.Users = (*UserService)(&c.common)
+
 	return c
 }
 
@@ -60,19 +61,26 @@ func (c *Client) SetBaseUrl(url string) *Client {
 	return c
 }
 
+func (c *Client) SetApiVersion(v string) *Client {
+	c.apiVersion = v
+	return c
+}
+
 func (c *Client) SetNotionVersion(version string) *Client {
 	c.notionVersion = version
 	return c
 }
 
+type query map[string]string
+type header map[string]string
 type reqParam struct {
 	method string
-	header map[string]any
-	query  map[string]any
+	header header
+	query  query
 	body   any
 }
 
-func (c *Client) req(ctx context.Context, path string, param *reqParam, result any) error {
+func (c *Client) req(path string, param *reqParam, result any) error {
 	api := c.baseUrl + "/" + c.apiVersion + path
 
 	u, err := url.Parse(api)
@@ -82,8 +90,10 @@ func (c *Client) req(ctx context.Context, path string, param *reqParam, result a
 
 	// set query
 	q := u.Query()
-	for k, v := range param.query {
-		q.Add(k, v.(string))
+	if param != nil && param.query != nil {
+		for k, v := range param.query {
+			q.Add(k, v)
+		}
 	}
 
 	// set body
@@ -102,32 +112,38 @@ func (c *Client) req(ctx context.Context, path string, param *reqParam, result a
 		method = http.MethodGet
 	}
 
+	// make request
 	req, err := http.NewRequest(method, u.String(), buf)
 	if err != nil {
 		return err
 	}
 
-	// set header
+	// set default header
 	req.Header.Add("Authorization", "Bearer "+c.token)
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("Notion-Version", c.notionVersion)
 
+	// set extend header
 	if param != nil && param.header != nil {
 		for k, v := range param.header {
-			req.Header.Add(k, v.(string))
+			req.Header.Add(k, v)
 		}
 	}
 
-	res, err := c.client.Do(req.WithContext(ctx))
+	// send request
+	res, err := c.client.Do(req)
 	if err != nil {
 		return err
 	}
+
 	defer res.Body.Close()
 
 	b, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		return err
 	}
+
+	fmt.Println(string(b))
 
 	if res.StatusCode != http.StatusOK {
 		return fmt.Errorf("network error status code %d with error %s ", res.StatusCode, string(b))
@@ -141,15 +157,15 @@ func (c *Client) req(ctx context.Context, path string, param *reqParam, result a
 	return nil
 }
 
-func (c *Client) get(path string, param map[string]any, result any) error {
-	return c.req(context.Background(), path, &reqParam{
+func (c *Client) get(path string, param query, result any) error {
+	return c.req(path, &reqParam{
 		method: http.MethodGet,
 		query:  param,
 	}, result)
 }
 
 func (c *Client) post(path string, body any, result any) error {
-	return c.req(context.Background(), path, &reqParam{
+	return c.req(path, &reqParam{
 		method: http.MethodPost,
 		body:   body,
 	}, result)

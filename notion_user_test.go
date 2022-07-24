@@ -1,7 +1,6 @@
 package notion
 
 import (
-	"context"
 	"fmt"
 	"os"
 	"testing"
@@ -14,7 +13,7 @@ var (
 
 func TestUserServiceRetrive(t *testing.T) {
 	notion := NewClient(NotionToken)
-	user, err := notion.Users.retrive(context.Background(), NotionBotId)
+	user, err := notion.Users.Retrive(NotionBotId)
 	if err != nil {
 		t.Fatalf("error %s\n", err)
 	}
@@ -23,9 +22,18 @@ func TestUserServiceRetrive(t *testing.T) {
 
 func TestUserServiceRetriveBot(t *testing.T) {
 	notion := NewClient(NotionToken)
-	bot, err := notion.Users.retriveBot(context.Background(), NotionBotId)
+	bot, err := notion.Users.RetriveBot(NotionBotId)
 	if err != nil {
 		t.Fatalf("error %s\n", err)
 	}
 	fmt.Printf("%+v\n", bot)
+}
+
+func TestUserServiceList(t *testing.T) {
+	notion := NewClient(NotionToken)
+	users, err := notion.Users.List("", 100)
+	if err != nil {
+		t.Fatalf("user list error %s", err)
+	}
+	fmt.Printf("%#v\n", users)
 }
