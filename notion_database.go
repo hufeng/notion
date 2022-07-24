@@ -1,3 +1,3 @@
 package notion
 
-type Database service
+type DatabaseService service

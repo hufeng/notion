@@ -1,3 +1,3 @@
 package notion
 
-type Search service
+type SearchService service

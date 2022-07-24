@@ -1,3 +1,3 @@
 package notion
 
-type Page service
+type PageService service

@@ -1,3 +1,3 @@
 package notion
 
-type Block service
+type BlockService service

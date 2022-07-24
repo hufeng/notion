@@ -24,13 +24,13 @@ type Client struct {
 	apiVersion    string
 	Token         string
 
-	common   service
-	Database *Database
-	Page     *Page
-	Block    *Block
-	Comment  *Comment
-	Search   *Search
-	User     *User
+	common    service
+	Databases *DatabaseService
+	Pages     *PageService
+	Blocks    *BlockService
+	Comments  *CommentService
+	Search    *SearchService
+	Users     *UserService
 }
 
 type service struct {
@@ -45,12 +45,12 @@ func NewClient() *Client {
 		apiVersion:    apiVersion,
 	}
 	c.common.client = c
-	c.Database = (*Database)(&c.common)
-	c.Page = (*Page)(&c.common)
-	c.Block = (*Block)(&c.common)
-	c.Comment = (*Comment)(&c.common)
-	c.Search = (*Search)(&c.common)
-	c.User = (*User)(&c.common)
+	c.Databases = (*DatabaseService)(&c.common)
+	c.Pages = (*PageService)(&c.common)
+	c.Blocks = (*BlockService)(&c.common)
+	c.Comments = (*CommentService)(&c.common)
+	c.Search = (*SearchService)(&c.common)
+	c.Users = (*UserService)(&c.common)
 	return c
 }
 

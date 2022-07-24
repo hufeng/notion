@@ -1,3 +1,3 @@
 package notion
 
-type Comment service
+type CommentService service

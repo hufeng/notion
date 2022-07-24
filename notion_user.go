@@ -1,3 +1,3 @@
 package notion
 
-type User service
+type UserService service
