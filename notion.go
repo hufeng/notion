@@ -64,14 +64,14 @@ func (c *Client) SetNotionVersion(version string) *Client {
 	return c
 }
 
-type req struct {
+type reqParam struct {
 	method string
 	header map[string]any
 	query  map[string]any
 	body   any
 }
 
-func (c *Client) req(ctx context.Context, path string, param *req, result any) error {
+func (c *Client) req(ctx context.Context, path string, param *reqParam, result any) error {
 	api := c.baseUrl + "/" + c.apiVersion + "/" + path
 	u, err := url.Parse(api)
 	if err != nil {
@@ -140,14 +140,14 @@ func (c *Client) req(ctx context.Context, path string, param *req, result any) e
 }
 
 func (c *Client) get(path string, param map[string]any, result any) error {
-	return c.req(context.Background(), path, &req{
+	return c.req(context.Background(), path, &reqParam{
 		method: http.MethodGet,
 		query:  param,
 	}, result)
 }
 
 func (c *Client) post(path string, body any, result any) error {
-	return c.req(context.Background(), path, &req{
+	return c.req(context.Background(), path, &reqParam{
 		method: http.MethodPost,
 		body:   body,
 	}, result)
